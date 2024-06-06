@@ -10,7 +10,7 @@ export class Publisher2 {
   @PrimaryKey()
   id!: number;
 
-  @Property({ type: 'string', nullable: true })
+  @Property({ type: 'string', length: -1, nullable: true })
   test?: string & Opt = '123';
 
   @Enum({ items: () => Publisher2Type })
@@ -47,14 +47,13 @@ export class Address2 {
   @OneToOne({ entity: () => Author2, updateRule: 'cascade', deleteRule: 'cascade', primary: true })
   author!: Author2;
 
-  @Property({ length: 255 })
+  @Property()
   value!: string;
 
 }
 ",
   "import { Collection, Entity, Index, ManyToMany, ManyToOne, type Opt, PrimaryKey, Property, Unique } from '@mikro-orm/core';
 import { Book2 } from './Book2';
-import { array } from './array';
 
 @Entity()
 @Index({ name: 'author2_name_age_index', properties: ['name', 'age'] })
@@ -71,12 +70,12 @@ export class Author2 {
   updatedAt!: Date & Opt;
 
   @Index({ name: 'custom_idx_name_123' })
-  @Property({ length: 255 })
+  @Property()
   name!: string;
 
   @Index({ name: 'custom_email_index_name' })
   @Unique({ name: 'custom_email_unique_name' })
-  @Property({ length: 255 })
+  @Property()
   email!: string;
 
   @Property({ nullable: true })
@@ -89,7 +88,7 @@ export class Author2 {
   @Property({ nullable: true })
   optional?: boolean;
 
-  @Property({ type: array, columnType: 'text[]', nullable: true })
+  @Property({ nullable: true })
   identities?: string[];
 
   @Index({ name: 'author2_born_index' })
@@ -130,7 +129,7 @@ export class BookTag2 {
 
 }
 ",
-  "import { Collection, Entity, ManyToMany, ManyToOne, type Opt, PrimaryKey, PrimaryKeyProp, Property } from '@mikro-orm/core';
+  "import { Collection, Entity, ManyToMany, ManyToOne, type Opt, PrimaryKey, PrimaryKeyProp, Property, Unique } from '@mikro-orm/core';
 import { Author2 } from './Author2';
 import { BookTag2 } from './BookTag2';
 import { Publisher2 } from './Publisher2';
@@ -146,7 +145,11 @@ export class Book2 {
   @Property({ type: 'datetime', length: 3, defaultRaw: \`current_timestamp(3)\` })
   createdAt!: Date & Opt;
 
-  @Property({ type: 'string', length: 255, nullable: true })
+  @Unique({ name: 'book_isbn_unique' })
+  @Property({ type: 'character', length: 13, nullable: true })
+  isbn?: string;
+
+  @Property({ type: 'string', nullable: true })
   title?: string & Opt = '';
 
   @Property({ type: 'text', nullable: true })
@@ -167,7 +170,7 @@ export class Book2 {
   @ManyToOne({ entity: () => Publisher2, updateRule: 'cascade', deleteRule: 'cascade', nullable: true })
   publisher?: Publisher2;
 
-  @Property({ type: 'string', length: 255, nullable: true })
+  @Property({ type: 'string', nullable: true })
   foo?: string & Opt = 'lol';
 
   @ManyToMany({ entity: () => BookTag2, pivotTable: 'book_to_tag_unordered', joinColumn: 'book2_uuid_pk', inverseJoinColumn: 'book_tag2_id' })
@@ -203,20 +206,19 @@ export class Configuration2 {
 
   [PrimaryKeyProp]?: ['property', 'test'];
 
-  @PrimaryKey({ length: 255 })
+  @PrimaryKey()
   property!: string;
 
   @ManyToOne({ entity: () => Test2, updateRule: 'cascade', primary: true })
   test!: Test2;
 
-  @Property({ length: 255 })
+  @Property()
   value!: string;
 
 }
 ",
   "import { Entity, OneToOne, type Opt, PrimaryKey, Property } from '@mikro-orm/core';
 import { FooBaz2 } from './FooBaz2';
-import { array } from './array';
 
 @Entity()
 export class FooBar2 {
@@ -224,10 +226,10 @@ export class FooBar2 {
   @PrimaryKey()
   id!: number;
 
-  @Property({ length: 255 })
+  @Property()
   name!: string;
 
-  @Property({ fieldName: 'name with space', length: 255, nullable: true })
+  @Property({ fieldName: 'name with space', nullable: true })
   nameWithSpace?: string;
 
   @OneToOne({ entity: () => FooBaz2, updateRule: 'cascade', deleteRule: 'set null', nullable: true })
@@ -245,7 +247,7 @@ export class FooBar2 {
   @Property({ nullable: true })
   blob2?: Buffer;
 
-  @Property({ type: array, columnType: 'text[]', nullable: true })
+  @Property({ nullable: true })
   array?: string[];
 
   @Property({ type: 'json', nullable: true })
@@ -261,10 +263,10 @@ export class FooBaz2 {
   @PrimaryKey()
   id!: number;
 
-  @Property({ length: 255 })
+  @Property()
   name!: string;
 
-  @Property({ length: 255 })
+  @Property()
   code!: string;
 
   @Property({ type: 'datetime', length: 3, defaultRaw: \`current_timestamp(3)\` })
@@ -287,7 +289,7 @@ export class FooParam2 {
   @ManyToOne({ entity: () => FooBaz2, updateRule: 'cascade', primary: true })
   baz!: FooBaz2;
 
-  @Property({ length: 255 })
+  @Property()
   value!: string;
 
   @Property({ type: 'datetime', length: 3, defaultRaw: \`current_timestamp(3)\` })
@@ -303,7 +305,7 @@ export class Label2 {
   @PrimaryKey({ type: 'uuid' })
   uuid!: string;
 
-  @Property({ length: 255 })
+  @Property()
   name!: string;
 
 }
@@ -334,7 +336,7 @@ export class Publisher2 {
   @PrimaryKey()
   id!: number;
 
-  @Property({ length: 255 })
+  @Property()
   name!: string;
 
   @Enum({ items: () => Publisher2Type })
@@ -408,7 +410,7 @@ export class Test2 {
   @PrimaryKey()
   id!: number;
 
-  @Property({ length: 255, nullable: true })
+  @Property({ nullable: true })
   name?: string;
 
   @OneToOne({ entity: () => Book2, deleteRule: 'set null', nullable: true })
@@ -444,14 +446,13 @@ export class Address2 {
   @OneToOne({ entity: () => Author2, updateRule: 'cascade', deleteRule: 'cascade', primary: true })
   author!: Author2;
 
-  @Property({ length: 255 })
+  @Property()
   value!: string;
 
 }
 ",
   "import { Collection, Entity, Index, ManyToMany, ManyToOne, type Opt, PrimaryKey, Property, Unique } from '@mikro-orm/core';
 import { Book2 } from './Book2';
-import { array } from './array';
 
 @Entity()
 @Index({ name: 'author2_name_age_index', properties: ['name', 'age'] })
@@ -468,12 +469,12 @@ export class Author2 {
   updatedAt!: Date & Opt;
 
   @Index({ name: 'custom_idx_name_123' })
-  @Property({ length: 255 })
+  @Property()
   name!: string;
 
   @Index({ name: 'custom_email_index_name' })
   @Unique({ name: 'custom_email_unique_name' })
-  @Property({ length: 255 })
+  @Property()
   email!: string;
 
   @Property({ nullable: true })
@@ -486,7 +487,7 @@ export class Author2 {
   @Property({ nullable: true })
   optional?: boolean;
 
-  @Property({ type: array, columnType: 'text[]', nullable: true })
+  @Property({ nullable: true })
   identities?: string[];
 
   @Index({ name: 'author2_born_index' })
@@ -527,7 +528,7 @@ export class BookTag2 {
 
 }
 ",
-  "import { Collection, Entity, ManyToMany, ManyToOne, type Opt, PrimaryKey, PrimaryKeyProp, Property } from '@mikro-orm/core';
+  "import { Collection, Entity, ManyToMany, ManyToOne, type Opt, PrimaryKey, PrimaryKeyProp, Property, Unique } from '@mikro-orm/core';
 import { Author2 } from './Author2';
 import { BookTag2 } from './BookTag2';
 import { Publisher2 } from './Publisher2';
@@ -543,7 +544,11 @@ export class Book2 {
   @Property({ type: 'datetime', length: 3, defaultRaw: \`current_timestamp(3)\` })
   createdAt!: Date & Opt;
 
-  @Property({ type: 'string', length: 255, nullable: true })
+  @Unique({ name: 'book_isbn_unique' })
+  @Property({ type: 'character', length: 13, nullable: true })
+  isbn?: string;
+
+  @Property({ type: 'string', nullable: true })
   title?: string & Opt = '';
 
   @Property({ type: 'text', nullable: true })
@@ -561,7 +566,7 @@ export class Book2 {
   @ManyToOne({ entity: () => Publisher2, updateRule: 'cascade', deleteRule: 'cascade', nullable: true })
   publisher?: Publisher2;
 
-  @Property({ type: 'string', length: 255, nullable: true })
+  @Property({ type: 'string', nullable: true })
   foo?: string & Opt = 'lol';
 
   @ManyToMany({ entity: () => BookTag2, pivotTable: 'book_to_tag_unordered', joinColumn: 'book2_uuid_pk', inverseJoinColumn: 'book_tag2_id' })
@@ -597,20 +602,19 @@ export class Configuration2 {
 
   [PrimaryKeyProp]?: ['property', 'test'];
 
-  @PrimaryKey({ length: 255 })
+  @PrimaryKey()
   property!: string;
 
   @ManyToOne({ entity: () => Test2, updateRule: 'cascade', primary: true })
   test!: Test2;
 
-  @Property({ length: 255 })
+  @Property()
   value!: string;
 
 }
 ",
   "import { Entity, OneToOne, type Opt, PrimaryKey, Property } from '@mikro-orm/core';
 import { FooBaz2 } from './FooBaz2';
-import { array } from './array';
 
 @Entity()
 export class FooBar2 {
@@ -618,10 +622,10 @@ export class FooBar2 {
   @PrimaryKey()
   id!: number;
 
-  @Property({ length: 255 })
+  @Property()
   name!: string;
 
-  @Property({ fieldName: 'name with space', length: 255, nullable: true })
+  @Property({ fieldName: 'name with space', nullable: true })
   nameWithSpace?: string;
 
   @OneToOne({ entity: () => FooBaz2, updateRule: 'cascade', deleteRule: 'set null', nullable: true })
@@ -639,7 +643,7 @@ export class FooBar2 {
   @Property({ nullable: true })
   blob2?: Buffer;
 
-  @Property({ type: array, columnType: 'text[]', nullable: true })
+  @Property({ nullable: true })
   array?: string[];
 
   @Property({ type: 'json', nullable: true })
@@ -655,10 +659,10 @@ export class FooBaz2 {
   @PrimaryKey()
   id!: number;
 
-  @Property({ length: 255 })
+  @Property()
   name!: string;
 
-  @Property({ length: 255 })
+  @Property()
   code!: string;
 
   @Property({ type: 'datetime', length: 3, defaultRaw: \`current_timestamp(3)\` })
@@ -681,7 +685,7 @@ export class FooParam2 {
   @ManyToOne({ entity: () => FooBaz2, updateRule: 'cascade', primary: true })
   baz!: FooBaz2;
 
-  @Property({ length: 255 })
+  @Property()
   value!: string;
 
   @Property({ type: 'datetime', length: 3, defaultRaw: \`current_timestamp(3)\` })
@@ -697,7 +701,7 @@ export class Label2 {
   @PrimaryKey({ type: 'uuid' })
   uuid!: string;
 
-  @Property({ length: 255 })
+  @Property()
   name!: string;
 
 }
@@ -728,7 +732,7 @@ export class Publisher2 {
   @PrimaryKey()
   id!: number;
 
-  @Property({ length: 255 })
+  @Property()
   name!: string;
 
   @Enum({ items: () => Publisher2Type })
@@ -798,7 +802,6 @@ export class Publisher2Tests {
 exports[`EntityGenerator takeTables [postgres]: postgres-entity-dump-takeTables 1`] = `
 [
   "import { Entity, type Opt, PrimaryKey, Property, Unique } from '@mikro-orm/core';
-import { array } from './array';
 
 @Entity()
 export class FooBar2 {
@@ -806,10 +809,10 @@ export class FooBar2 {
   @PrimaryKey()
   id!: number;
 
-  @Property({ length: 255 })
+  @Property()
   name!: string;
 
-  @Property({ fieldName: 'name with space', length: 255, nullable: true })
+  @Property({ fieldName: 'name with space', nullable: true })
   nameWithSpace?: string;
 
   @Unique({ name: 'foo_bar2_baz_id_unique' })
@@ -829,7 +832,7 @@ export class FooBar2 {
   @Property({ nullable: true })
   blob2?: Buffer;
 
-  @Property({ type: array, columnType: 'text[]', nullable: true })
+  @Property({ nullable: true })
   array?: string[];
 
   @Property({ type: 'json', nullable: true })
@@ -845,7 +848,7 @@ export class Test2 {
   @PrimaryKey()
   id!: number;
 
-  @Property({ length: 255, nullable: true })
+  @Property({ nullable: true })
   name?: string;
 
   @Unique({ name: 'test2_book_uuid_pk_unique' })
@@ -876,7 +879,7 @@ export class Test2 {
   @PrimaryKey()
   id!: number;
 
-  @Property({ length: 255, nullable: true })
+  @Property({ nullable: true })
   name?: string;
 
   @Unique({ name: 'test2_book_uuid_pk_unique' })

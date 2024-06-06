@@ -13,7 +13,9 @@ import {
   type NamingStrategy,
   ReferenceKind,
   t,
+  Type,
   type UniqueOptions,
+  UnknownType,
   Utils,
 } from '@mikro-orm/core';
 import type { SchemaHelper } from './SchemaHelper';
@@ -110,7 +112,7 @@ export class DatabaseTable {
       }
 
       if (prop.length == null && prop.columnTypes[idx]) {
-        prop.length = this.platform.getSchemaHelper()!.inferLengthFromColumnType(prop.columnTypes[idx]);
+        prop.length = this.platform.getSchemaHelper()!.inferLengthFromColumnType(prop.columnTypes[idx].trimStart(), prop.length);
       }
 
       const primary = !meta.compositePK && !!prop.primary && prop.kind === ReferenceKind.SCALAR && this.platform.isNumericColumn(mappedType);
@@ -629,6 +631,7 @@ export class DatabaseTable {
 
       const defaultRaw = this.getPropertyDefaultValue(schemaHelper, column, column.type, true);
       const defaultTs = this.getPropertyDefaultValue(schemaHelper, column, column.type);
+      const length = schemaHelper.inferLengthFromColumnType(column.type, column.length);
 
       columnOptions.default = defaultRaw !== defaultTs ? defaultTs : undefined;
       columnOptions.defaultRaw = (column.nullable && defaultRaw === 'null') ? undefined : defaultRaw;
@@ -636,7 +639,7 @@ export class DatabaseTable {
       columnOptions.generated = column.generated;
       columnOptions.nullable = column.nullable;
       columnOptions.primary = column.primary;
-      columnOptions.length = column.length;
+      columnOptions.length = length;
       columnOptions.precision = column.precision;
       columnOptions.scale = column.scale;
       columnOptions.enum = !!column.enumItems?.length;
@@ -677,6 +680,7 @@ export class DatabaseTable {
     const defaultRaw = this.getPropertyDefaultValue(schemaHelper, column, runtimeType, true);
     const defaultParsed = this.getPropertyDefaultValue(schemaHelper, column, runtimeType);
     const defaultTs = defaultRaw !== defaultParsed ? defaultParsed : undefined;
+    const length = schemaHelper.inferLengthFromColumnType(column.type, column.length);
     const fkOptions: Partial<EntityProperty> = {};
 
     if (fk) {
@@ -690,7 +694,10 @@ export class DatabaseTable {
 
     return {
       name: prop,
-      type: fk ? runtimeType : (Utils.entries(t).find(([k, v]) => Object.getPrototypeOf(column.mappedType) === v.prototype)?.[0] ?? runtimeType),
+      type: fk ? runtimeType : (Utils.keys(t).find(k => {
+        const typeInCoreMap = this.platform.getMappedType(k);
+        return (typeInCoreMap !== Type.getType(UnknownType) || k === 'unknown') && typeInCoreMap === column.mappedType;
+      }) ?? runtimeType),
       runtimeType,
       kind,
       generated: column.generated,
@@ -703,7 +710,7 @@ export class DatabaseTable {
       autoincrement: column.autoincrement,
       fieldName: column.name,
       unsigned: column.unsigned,
-      length: column.length,
+      length,
       precision: column.precision,
       scale: column.scale,
       index: index ? index.keyName : undefined,

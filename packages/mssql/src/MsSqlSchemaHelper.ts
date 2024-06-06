@@ -431,18 +431,35 @@ export class MsSqlSchemaHelper extends SchemaHelper {
     return super.createTableColumn(table, column, fromTable, changedProperties);
   }
 
-  override inferLengthFromColumnType(type: string): number | undefined {
-    const match = type.match(/n?varchar\((-?\d+|max)\)/);
+  override inferLengthFromColumnType(type: string, reportedLength?: number): number | undefined {
+    const match = type.match(/^(char|varchar|nchar|nvarchar)\s*(?:\(\s*(-?\d+|max)\s*\))?/);
 
+    // Unrecognized types get whatever length was reported
     if (!match) {
-      return undefined;
+      return reportedLength;
     }
 
-    if (match[1] === 'max') {
+    // When length is not specified, the default is 1,
+    // but what we infer is based on the runtime defaults.
+    if (!match[2] || match[2] === '1') {
+      // The default for (n)varchar is not 1, so we return 1
+      if (['varchar', 'nvarchar'].includes(match[1])) {
+        return 1;
+      }
+      // The default for (n)char is 1, so we return undefined to signal the default.
+      return;
+    }
+
+    if (match[2] === '255' && ['varchar', 'nvarchar'].includes(match[1])) {
+      return;
+    }
+
+    if (match[2] === 'max') {
       return -1;
     }
 
-    return +match[1];
+    return +match[2];
+
   }
 
   protected wrap(val: string | undefined, type: Type<unknown>): string | undefined {

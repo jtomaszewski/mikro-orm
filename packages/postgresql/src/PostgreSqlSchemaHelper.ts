@@ -628,4 +628,24 @@ export class PostgreSqlSchemaHelper extends SchemaHelper {
     return res[tableName];
   }
 
+  override inferLengthFromColumnType(type: string, reportedLength?: number): number | undefined {
+    const match = type.match(/^(bpchar|char|character|varchar|character varying)\s*(?:\(\s*(\d+)\s*\))?/);
+
+    if (!match) {
+      return reportedLength;
+    }
+
+    if (!match[2]) {
+      return -1;
+    }
+
+    if ((match[2] === '1' && ['bpchar', 'char', 'character'].includes(match[1]))
+      || (match[2] === '255' && ['varchar', 'character varying'].includes(match[1]))
+    ) {
+      return;
+    }
+
+    return +match[2];
+  }
+
 }

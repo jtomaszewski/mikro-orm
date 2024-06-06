@@ -515,7 +515,7 @@ export class SourceFile {
     } else {
       if (this.options.scalarTypeInDecorator // always output type if forced by the generator options
         || prop.hidden || (prop.optional && (!prop.nullable || prop.default != null)) // also when there are prop type modifiers, because reflect-metadata can't extract the base
-        || (new Set([mappedRuntimeType.name, mappedColumnType.name, mappedDeclaredType.name, this.platform.getMappedType(prop.runtimeType === 'Date' ? 'datetime' : prop.runtimeType).name])).size > 1 // also if there's any ambiguity in the type.
+        || (new Set([mappedRuntimeType.name, mappedDeclaredType.name, this.platform.getMappedType(prop.runtimeType === 'Date' ? 'datetime' : prop.runtimeType).name])).size > 1 // also if there's any ambiguity in the type.
       ) {
         options.type = this.quote(prop.type);
       }

@@ -307,10 +307,13 @@ export const types = {
   double: DoubleType,
   boolean: BooleanType,
   decimal: DecimalType,
+  character: CharacterType,
   string: StringType,
   uuid: UuidType,
   text: TextType,
-};
+  interval: IntervalType,
+  unknown: UnknownType,
+} as const;
 ```
 
 ### ArrayType
